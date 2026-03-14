@@ -1,6 +1,6 @@
 package com.example.backend.enums;
 
-public enum Status {
+public enum LoadStatus {
     POSTED,
     BOOKED,
     IN_TRANSPORT,

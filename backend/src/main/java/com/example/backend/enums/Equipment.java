@@ -5,5 +5,7 @@ public enum Equipment {
     REEFER,
     FLATBED,
     STEP_DECK,
-    POWER_ONLY
+    POWER_ONLY,
+    BOX_TRUCK,
+    HOTSHOT
 }

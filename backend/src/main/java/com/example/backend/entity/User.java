@@ -32,10 +32,10 @@ public class User {
 
 
     @Column(nullable = false, unique = false)
-    private String name;
+    private String firstName;
 
     @Column(nullable = false, unique = false)
-    private String lastname;
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     @Email(message = "Email mora biti validan i sadržati @")
