@@ -17,35 +17,21 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
     public Optional<User> findById(UUID id){
         return userRepository.findById(id);
     }
 
-    public Optional<User> findByEmail(String email){
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public Optional<User> getByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public List<User> getUsersByRole(UserRole role) {
-        return userRepository.findByRole(role);
-    }
-
-    public Optional<User> registerUser(UserDTO userDTO){
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            return Optional.empty();
-        }
-        User user = User.builder()
-                .name(userDTO.getName())
-                .lastname(userDTO.getLastname())
-                .email(userDTO.getEmail()) // Username je email
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .role(userDTO.getRole())
-                .build();
-        return  Optional.of(userRepository.save(user));
-
-
+    public List<User> getUsersByCompanyAndRole(UUID companyId, UserRole role) {
+        return userRepository.findByCompanyIdAndRole(companyId, role);
     }
 
 

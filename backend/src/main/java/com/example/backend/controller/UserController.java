@@ -17,32 +17,6 @@ import java.util.UUID;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email){
-        return userService.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-
-    }
-
-    @GetMapping("/role/{role}")
-    public List<User> getUsersByRole(@PathVariable UserRole role) {
-        return userService.getUsersByRole(role);
-    }
-
-    //POST------------------------------------------------------------------------------
-
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody @Valid UserDTO userDTO){
-        return userService.registerUser(userDTO)
-                .map(user -> ResponseEntity.ok("Korisnik registrovan: " + user.getEmail()))
-                .orElseGet(() -> ResponseEntity
-                        .badRequest()
-                        .body("Registracija neuspešna: email već postoji"));
-    }
 
 
 }
