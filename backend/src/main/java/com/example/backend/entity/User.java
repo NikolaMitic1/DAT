@@ -44,6 +44,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
