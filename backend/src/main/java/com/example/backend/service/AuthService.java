@@ -1,12 +1,11 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.AuthResponse;
-import com.example.backend.dto.LoginRequest;
-import com.example.backend.dto.RegisterRequest;
+import com.example.backend.dto.response.AuthResponse;
+import com.example.backend.dto.request.LoginRequest;
+import com.example.backend.dto.request.RegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.example.backend.dto;
+package com.example.backend.dto.request;
 
 import com.example.backend.enums.UserRole;
 import lombok.Data;

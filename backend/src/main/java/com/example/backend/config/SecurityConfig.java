@@ -27,8 +27,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/auth/**").permitAll()  // login, register
+                        .requestMatchers("/api/broker/**").hasRole("BROKER")   // samo broker
+                        .requestMatchers("/api/carrier/**").hasRole("CARRIER") // samo carrier
+                        .anyRequest().authenticated()  // sve ostalo
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
