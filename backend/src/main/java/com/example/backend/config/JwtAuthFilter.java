@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.entity.CustomUserDetails;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.JwtService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -45,12 +47,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (user != null && !jwtService.isTokenExpired(token)) {
 
+                CustomUserDetails userDetails = new CustomUserDetails(user);
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                user,
+                                userDetails,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                                userDetails.getAuthorities()
                         );
+
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

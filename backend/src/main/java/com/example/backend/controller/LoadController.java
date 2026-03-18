@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.CreateLoadRequest;
+import com.example.backend.entity.CustomUserDetails;
 import com.example.backend.entity.Load;
 import com.example.backend.service.LoadService;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +19,16 @@ public class LoadController {
     private final LoadService loadService;
 
     @PostMapping("/create")
-    public ResponseEntity<Load> createLoad(@AuthenticationPrincipal String email, @RequestBody CreateLoadRequest request) {
-        Load load = loadService.createLoadForBroker(email, request);
+    public ResponseEntity<Load> createLoad(@AuthenticationPrincipal CustomUserDetails user, @RequestBody CreateLoadRequest request)
+    {
+        Load load = loadService.createLoadForBroker(user.getEmail(), request);
         return ResponseEntity.ok(load);
     }
 
 
     @GetMapping("/my-loads")
-    public ResponseEntity<List<Load>> getMyLoads(@AuthenticationPrincipal String email) {
-        List<Load> loads = loadService.getLoadsForBroker(email);
+    public ResponseEntity<List<Load>> getMyLoads(@AuthenticationPrincipal CustomUserDetails user) {
+        List<Load> loads = loadService.getLoadsForBroker(user.getEmail());
         return ResponseEntity.ok(loads);
     }
 
