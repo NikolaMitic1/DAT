@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.request.CreateLoadRequest;
+import com.example.backend.dto.request.UpdateLoadRequest;
 import com.example.backend.entity.CustomUserDetails;
 import com.example.backend.entity.Load;
 import com.example.backend.service.LoadService;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/loads")
@@ -30,6 +32,14 @@ public class LoadController {
     public ResponseEntity<List<Load>> getMyLoads(@AuthenticationPrincipal CustomUserDetails user) {
         List<Load> loads = loadService.getLoadsForBroker(user.getEmail());
         return ResponseEntity.ok(loads);
+    }
+
+    @PostMapping("/edit/{id}")
+    public ResponseEntity<Load> editLoad(@AuthenticationPrincipal CustomUserDetails user,
+                                         @PathVariable UUID id,
+                                         @RequestBody UpdateLoadRequest request) {
+        Load load = loadService.updateLoadForBroker(user.getEmail(), id, request);
+        return ResponseEntity.ok(load);
     }
 
 }

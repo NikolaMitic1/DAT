@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.dto.request.LoadRequest;
 import com.example.backend.dto.request.CreateLoadRequest;
+import com.example.backend.dto.request.UpdateLoadRequest;
 import com.example.backend.entity.Load;
 import com.example.backend.entity.User;
 import com.example.backend.enums.UserRole;
@@ -71,5 +72,35 @@ public class LoadService {
 
     public Load getLoadByReferenceNumber(String number) {
         return loadRepository.findByReferenceNumber(number).orElseThrow(() -> new RuntimeException("Load not found"));
+    }
+
+    public Load updateLoadForBroker(String email, UUID loadId, UpdateLoadRequest request) {
+        User broker = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Broker not found"));
+
+        if (broker.getRole() != UserRole.BROKER) {
+            throw new RuntimeException("User is not a broker");
+        }
+
+        Load load = loadRepository.findById(loadId)
+                .orElseThrow(() -> new RuntimeException("Load not found"));
+
+        if (!load.getBroker().getId().equals(broker.getId())) {
+            throw new RuntimeException("Load does not belong to this broker");
+        }
+
+        load.setReferenceNumber(request.getReferenceNumber());
+        load.setDescription(request.getDescription());
+        load.setPickupLocation(request.getPickupLocation());
+        load.setPickUpDateTime(request.getPickUpDateTime());
+        load.setDeliveryLocation(request.getDeliveryLocation());
+        load.setDeliveryDateTime(request.getDeliveryDateTime());
+        load.setWeight(request.getWeight());
+        load.setCommodity(request.getCommodity());
+        load.setPrice(request.getPrice());
+        load.setSize(request.getSize());
+        load.setStatus(request.getStatus());
+
+        return loadRepository.save(load);
     }
 }
