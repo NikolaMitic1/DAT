@@ -30,8 +30,9 @@ public class LoadOfferController {
 
     @GetMapping("/load/{loadId}")
     public ResponseEntity<List<LoadOffer>> getOffersForLoad(
+            @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable UUID loadId) {
-        List<LoadOffer> offers = loadOfferService.getOffersForLoad(loadId);
+        List<LoadOffer> offers = loadOfferService.getOffersForLoad(user.getEmail(), loadId);
         return ResponseEntity.ok(offers);
     }
 

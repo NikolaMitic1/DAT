@@ -3,13 +3,16 @@ package com.example.backend.service;
 import com.example.backend.dto.request.CreateLoadOfferRequest;
 import com.example.backend.dto.request.UpdateOfferStatusRequest;
 import com.example.backend.entity.Load;
+import com.example.backend.entity.LoadAssignment;
 import com.example.backend.entity.LoadOffer;
 import com.example.backend.entity.Truck;
 import com.example.backend.entity.User;
+import com.example.backend.enums.LoadAssignmentStatus;
 import com.example.backend.enums.LoadStatus;
 import com.example.backend.enums.OfferStatus;
 import com.example.backend.enums.TruckStatus;
 import com.example.backend.enums.UserRole;
+import com.example.backend.repository.LoadAssignmentRepository;
 import com.example.backend.repository.LoadOfferRepository;
 import com.example.backend.repository.LoadRepository;
 import com.example.backend.repository.TruckRepository;
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class LoadOfferService {
 
     private final LoadOfferRepository loadOfferRepository;
+    private final LoadAssignmentRepository loadAssignmentRepository;
     private final LoadRepository loadRepository;
     private final TruckRepository truckRepository;
     private final UserRepository userRepository;
@@ -74,7 +78,21 @@ public class LoadOfferService {
         return loadOfferRepository.save(offer);
     }
 
-    public List<LoadOffer> getOffersForLoad(UUID loadId) {
+    public List<LoadOffer> getOffersForLoad(String userEmail, UUID loadId) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Load load = loadRepository.findById(loadId)
+                .orElseThrow(() -> new RuntimeException("Load not found"));
+
+        if (user.getRole() != UserRole.BROKER) {
+            throw new RuntimeException("Only brokers can view offers for loads");
+        }
+
+        if (!load.getBroker().getId().equals(user.getId())) {
+            throw new RuntimeException("Load does not belong to this broker");
+        }
+
         return loadOfferRepository.findByLoadId(loadId);
     }
 
@@ -133,6 +151,15 @@ public class LoadOfferService {
             Truck truck = offer.getTruck();
             truck.setTruckStatus(TruckStatus.ON_LOAD);
             truckRepository.save(truck);
+
+            LoadAssignment assignment = LoadAssignment.builder()
+                    .load(load)
+                    .truck(truck)
+                    .driver(truck.getDriver())
+                    .status(LoadAssignmentStatus.ACTIVE)
+                    .startTime(LocalDateTime.now())
+                    .build();
+            loadAssignmentRepository.save(assignment);
 
             loadOfferRepository.findByLoad(load).stream()
                     .filter(o -> !o.getId().equals(offerId))
