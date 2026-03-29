@@ -1,5 +1,7 @@
 # DAT Freight & Analytics Srbija
 
+![DAT Logo](frontend/public/dat-logo.png)
+
 ---
 
 ## Opis
