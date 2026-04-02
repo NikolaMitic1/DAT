@@ -1,0 +1,14 @@
+/* src/components/Layout.css */
+
+.layout {
+  display: flex;
+}
+
+.layout-content {
+  margin-left: 240px; /* širina sidebara */
+  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f1f5f9; /* svetlo siva pozadina */
+  transition: margin-left 0.3s ease; /* ako ubaciš collapse sidebar */
+}
