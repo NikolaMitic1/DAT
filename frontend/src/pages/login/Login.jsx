@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import "./Login.css";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,14 +17,10 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        formData,
-      );
+      const res = await axios.post("http://localhost:8080/api/auth/login", formData);
       const { token, role } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
-
       if (role === "BROKER") navigate("/broker");
       else if (role === "CARRIER") navigate("/carrier");
       else navigate("/");
@@ -34,23 +30,33 @@ export default function Login() {
   };
 
   return (
-    <div className="login-page">
-      {/* Logo u gornjem levom uglu */}
-      <div className="top-logo">
-        <img src="/dat-logo1.png" alt="DAT Logo" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center font-outfit text-white relative"
+      style={{
+        background: 'linear-gradient(rgba(18,25,33,0.85),rgba(18,25,33,0.85)), url("https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1920&q=80") center/cover no-repeat',
+      }}
+    >
+      <div className="absolute top-0 left-0">
+        <img src="/dat-logo1.png" alt="DAT Logo" className="w-80" />
       </div>
 
-      <div className="login-card">
-        <h1>Log in</h1>
-        <p className="subtitle">to continue to your account</p>
+      <div className="bg-white text-gray-700 rounded shadow-2xl w-full max-w-sm px-10 py-8 text-center">
+        <h1 className="text-3xl font-semibold mb-1 mt-0">Log in</h1>
+        <p className="text-gray-500 text-sm mb-5">to continue to your account</p>
 
-        {error && <p className="error-msg">{error}</p>}
+        {error && (
+          <p className="text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-4 text-sm">
+            {error}
+          </p>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <div className="label-row">
-              <label>Username/Email</label>
-              <a href="#" className="inline-link">
+        <form onSubmit={handleSubmit} className="text-left">
+          <div className="mb-4">
+            <div className="flex justify-between mb-1">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                Username/Email
+              </label>
+              <a href="#" className="text-xs font-semibold text-blue-700 hover:underline">
                 Forgot your username?
               </a>
             </div>
@@ -60,62 +66,67 @@ export default function Login() {
               value={formData.email}
               onChange={handleChange}
               required
+              className="w-full px-3 py-2.5 border border-gray-200 rounded bg-gray-50 text-sm focus:outline-none focus:border-gray-400"
             />
           </div>
 
-          <div className="input-group">
-            <div className="label-row">
-              <label>Password</label>
-              <a href="#" className="inline-link">
+          <div className="mb-4">
+            <div className="flex justify-between mb-1">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                Password
+              </label>
+              <a href="#" className="text-xs font-semibold text-blue-700 hover:underline">
                 Reset password
               </a>
             </div>
-            <div className="password-wrapper">
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
+                className="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded bg-gray-50 text-sm focus:outline-none focus:border-gray-400"
               />
-              <span
-                className="toggle-password"
+              <button
+                type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? "👁️‍🗨️" : "👁️‍🗨️"}
-              </span>
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
-          <div className="remember-me">
-            <input type="checkbox" id="remember" />
-            <label htmlFor="remember">Remember me</label>
+          <div className="flex items-center gap-2 mb-4">
+            <input type="checkbox" id="remember" className="cursor-pointer" />
+            <label htmlFor="remember" className="text-sm cursor-pointer">Remember me</label>
           </div>
 
-          <button type="submit" className="login-btn">
+          <button
+            type="submit"
+            className="w-full bg-[#1a1e23] hover:bg-[#2c333a] text-white py-3.5 rounded-full font-bold tracking-widest text-sm transition-colors mb-4"
+          >
             LOG IN
           </button>
         </form>
 
-        <div className="signup-box">
+        <div className="bg-gray-100 flex justify-center items-center gap-2.5 px-3 py-3 text-sm mb-4 rounded">
           <span>Need an account?</span>
-          <Link
-            title="Create account"
-            to="/register"
-            className="create-acc-link"
-          >
+          <Link to="/register" className="font-bold text-gray-800 border-b-2 border-gray-800 hover:text-gray-600">
             Create account
           </Link>
         </div>
 
-        <p className="terms">
-          By continuing you agree to our <a href="#">terms and conditions</a>.
+        <p className="text-[11px] text-gray-500">
+          By continuing you agree to our{" "}
+          <a href="#" className="text-gray-500 underline">terms and conditions</a>.
         </p>
       </div>
 
-      <footer className="login-footer">
+      <footer className="mt-4 text-[11px] opacity-60 text-center">
         <p>Copyright © 2026 DAT Solutions, LLC. All rights reserved.</p>
-        <a href="#">Privacy Policy</a>
+        <a href="#" className="text-white hover:underline">Privacy Policy</a>
       </footer>
     </div>
   );

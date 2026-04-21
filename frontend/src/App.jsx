@@ -1,30 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
-import Layout from "./components/Layout";
+import BrokerDashboard from "./pages/broker/BrokerDashboard";
+import CarrierDashboard from "./pages/carrier/CarrierDashboard";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Login i Register bez Layout */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Layout prikazuje sidebar samo ako je user ulogovan */}
-          <Route
-            path="/dashboard"
-            element={
-              <Layout>
-                <Dashboard />
-              </Layout>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/broker" element={<BrokerDashboard />} />
+        <Route path="/carrier" element={<CarrierDashboard />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
