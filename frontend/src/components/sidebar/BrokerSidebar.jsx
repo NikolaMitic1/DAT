@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Search,
@@ -9,7 +10,9 @@ import {
   Bell,
   HelpCircle,
   User,
+  LogOut,
 } from "lucide-react";
+import { AuthContext } from "../../context/AuthContext";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/broker" },
@@ -29,6 +32,13 @@ const bottomItems = [
 
 export default function BrokerSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="w-[260px] min-w-[260px] h-screen bg-dat-dark flex flex-col justify-between border-r border-dat-border font-outfit">
@@ -57,9 +67,10 @@ export default function BrokerSidebar() {
                 <Link
                   to={path}
                   className={`flex items-center gap-3.5 px-6 py-3 cursor-pointer transition-all duration-150 border-l-[3px] text-sm font-normal tracking-[0.3px] no-underline
-                    ${active
-                      ? "bg-amber-400/10 text-amber-400 border-l-amber-400"
-                      : "text-[#4b5563] border-l-transparent hover:bg-white/[0.04] hover:text-[#d1d5db] hover:border-l-amber-400/30"
+                    ${
+                      active
+                        ? "bg-amber-400/10 text-amber-400 border-l-amber-400"
+                        : "text-[#4b5563] border-l-transparent hover:bg-white/[0.04] hover:text-[#d1d5db] hover:border-l-amber-400/30"
                     }`}
                 >
                   <Icon size={18} strokeWidth={1.8} className="flex-shrink-0" />
@@ -81,6 +92,14 @@ export default function BrokerSidebar() {
             <span>{label}</span>
           </div>
         ))}
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3.5 px-6 py-2.5 cursor-pointer transition-all duration-150 text-[#374151] border-l-[3px] border-l-transparent hover:bg-red-500/10 hover:text-red-400 hover:border-l-red-500/50 text-[13px] mt-1"
+        >
+          <LogOut size={17} strokeWidth={1.8} className="flex-shrink-0" />
+          <span>Log Out</span>
+        </button>
       </div>
     </div>
   );

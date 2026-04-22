@@ -1,7 +1,9 @@
 package com.example.backend.service;
 
 import com.example.backend.entity.Truck;
+import com.example.backend.entity.User;
 import com.example.backend.repository.TruckRepository;
+import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +15,14 @@ import java.util.UUID;
 public class TruckService {
 
     private final TruckRepository truckRepository;
+    private final UserRepository userRepository;
 
     public List<Truck> getAllTrucks() {
         return truckRepository.findAll();
+    }
+
+    public List<Truck> getTrucksForCarrier(String email) {
+        return truckRepository.findByCarrierEmail(email);
     }
 
     public Truck getTruckById(UUID id) {
@@ -24,6 +31,13 @@ public class TruckService {
     }
 
     public Truck createTruck(Truck truck) {
+        return truckRepository.save(truck);
+    }
+
+    public Truck createTruckForCarrier(String carrierEmail, Truck truck) {
+        User carrier = userRepository.findByEmail(carrierEmail)
+                .orElseThrow(() -> new RuntimeException("Carrier not found"));
+        truck.setCarrier(carrier);
         return truckRepository.save(truck);
     }
 

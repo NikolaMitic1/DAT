@@ -49,6 +49,10 @@ public class Truck {
     private TruckStatus truckStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "carrier_id")
+    private User carrier;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private User driver;
 

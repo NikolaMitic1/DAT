@@ -1,9 +1,11 @@
 package com.example.backend.controller;
 
+import com.example.backend.entity.CustomUserDetails;
 import com.example.backend.entity.Truck;
 import com.example.backend.service.TruckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,14 +23,20 @@ public class TruckController {
         return ResponseEntity.ok(truckService.getAllTrucks());
     }
 
+    @GetMapping("/my-trucks")
+    public ResponseEntity<List<Truck>> getMyTrucks(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(truckService.getTrucksForCarrier(user.getEmail()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Truck> getTruckById(@PathVariable UUID id) {
         return ResponseEntity.ok(truckService.getTruckById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Truck> createTruck(@RequestBody Truck truck) {
-        return ResponseEntity.ok(truckService.createTruck(truck));
+    public ResponseEntity<Truck> createTruck(@AuthenticationPrincipal CustomUserDetails user,
+                                             @RequestBody Truck truck) {
+        return ResponseEntity.ok(truckService.createTruckForCarrier(user.getEmail(), truck));
     }
 
     @PutMapping("/{id}")
