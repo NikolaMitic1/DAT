@@ -21,12 +21,17 @@ public class LoadController {
     private final LoadService loadService;
 
     @PostMapping("/create")
-    public ResponseEntity<Load> createLoad(@AuthenticationPrincipal CustomUserDetails user, @RequestBody CreateLoadRequest request)
-    {
+    public ResponseEntity<Load> createLoad(@AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody CreateLoadRequest request) {
         Load load = loadService.createLoadForBroker(user.getEmail(), request);
         return ResponseEntity.ok(load);
     }
 
+    @GetMapping("/")
+    public ResponseEntity<List<Load>> getAllLoads() {
+        List<Load> loads = loadService.getAllLoads();
+        return ResponseEntity.ok(loads);
+    }
 
     @GetMapping("/my-loads")
     public ResponseEntity<List<Load>> getMyLoads(@AuthenticationPrincipal CustomUserDetails user) {
@@ -36,8 +41,8 @@ public class LoadController {
 
     @PostMapping("/edit/{id}")
     public ResponseEntity<Load> editLoad(@AuthenticationPrincipal CustomUserDetails user,
-                                         @PathVariable UUID id,
-                                         @RequestBody UpdateLoadRequest request) {
+            @PathVariable UUID id,
+            @RequestBody UpdateLoadRequest request) {
         Load load = loadService.updateLoadForBroker(user.getEmail(), id, request);
         return ResponseEntity.ok(load);
     }

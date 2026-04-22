@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Search,
@@ -11,12 +12,12 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Search, label: "Search Loads" },
-  { icon: Truck, label: "My Trucks" },
-  { icon: Package, label: "My Loads" },
-  { icon: Lock, label: "Private Network" },
-  { icon: Wrench, label: "Tools" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/carrier" },
+  { icon: Search, label: "Search Loads", path: "/carrier/search-loads" },
+  { icon: Truck, label: "My Trucks", path: "/carrier/my-trucks" },
+  { icon: Package, label: "My Loads", path: "/carrier/my-loads" },
+  { icon: Lock, label: "Private Network", path: "/carrier/network" },
+  { icon: Wrench, label: "Tools", path: "/carrier/tools" },
 ];
 
 const bottomItems = [
@@ -26,6 +27,8 @@ const bottomItems = [
 ];
 
 export default function CarrierSidebar() {
+  const location = useLocation();
+
   return (
     <div className="w-[260px] min-w-[260px] h-screen bg-dat-dark flex flex-col justify-between border-r border-dat-border font-outfit">
       <div className="pt-7">
@@ -46,19 +49,24 @@ export default function CarrierSidebar() {
         </div>
 
         <ul className="list-none p-0 m-0 mb-6">
-          {navItems.map(({ icon: Icon, label, active }) => (
-            <li
-              key={label}
-              className={`flex items-center gap-3.5 px-6 py-3 cursor-pointer transition-all duration-150 border-l-[3px] text-sm font-normal tracking-[0.3px]
-                ${active
-                  ? "bg-amber-400/10 text-amber-400 border-l-amber-400"
-                  : "text-[#4b5563] border-l-transparent hover:bg-white/[0.04] hover:text-[#d1d5db] hover:border-l-amber-400/30"
-                }`}
-            >
-              <Icon size={18} strokeWidth={1.8} className="flex-shrink-0" />
-              <span>{label}</span>
-            </li>
-          ))}
+          {navItems.map(({ icon: Icon, label, path }) => {
+            const active = location.pathname === path;
+            return (
+              <li key={label}>
+                <Link
+                  to={path}
+                  className={`flex items-center gap-3.5 px-6 py-3 cursor-pointer transition-all duration-150 border-l-[3px] text-sm font-normal tracking-[0.3px] no-underline
+                    ${active
+                      ? "bg-amber-400/10 text-amber-400 border-l-amber-400"
+                      : "text-[#4b5563] border-l-transparent hover:bg-white/[0.04] hover:text-[#d1d5db] hover:border-l-amber-400/30"
+                    }`}
+                >
+                  <Icon size={18} strokeWidth={1.8} className="flex-shrink-0" />
+                  <span>{label}</span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
 

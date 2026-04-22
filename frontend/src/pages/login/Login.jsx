@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { loginUser } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,10 +19,9 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/login", formData);
+      const res = await axios.post("/api/auth/login", formData);
       const { token, role } = res.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
+      loginUser({ token, role });
       if (role === "BROKER") navigate("/broker");
       else if (role === "CARRIER") navigate("/carrier");
       else navigate("/");

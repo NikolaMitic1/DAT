@@ -4,13 +4,13 @@ export default function BrokerDashboard() {
   return (
     <div className="flex h-screen bg-dat-dark font-outfit">
       <BrokerSidebar />
-      <div className="flex-1 flex flex-col bg-dat-surface min-w-0 overflow-hidden">
-        <div className="flex items-center gap-3 px-8 h-[60px] bg-dat-header border-b border-dat-border flex-shrink-0">
-          <span className="text-[11px] font-semibold tracking-[2px] text-[#374151] uppercase">
+      <div className="flex-1 flex flex-col bg-white min-w-0 overflow-hidden">
+        <div className="flex items-center gap-3 px-8 h-[60px] bg-white border-b border-gray-200 flex-shrink-0">
+          <span className="text-[11px] font-semibold tracking-[2px] text-gray-400 uppercase">
             Broker Portal
           </span>
-          <span className="text-[#1e2d3d] text-base">/</span>
-          <span className="font-bebas text-xl tracking-[2px] text-slate-100">
+          <span className="text-gray-300 text-base">/</span>
+          <span className="font-bebas text-xl tracking-[2px] text-gray-800">
             Dashboard
           </span>
         </div>
