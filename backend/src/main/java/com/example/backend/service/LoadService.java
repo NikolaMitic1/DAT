@@ -42,7 +42,10 @@ public class LoadService {
 
         Load load = new Load();
         load.setBroker(broker); // postavljanje ko je broker
-        load.setReferenceNumber(request.getReferenceNumber());
+        String ref = (request.getReferenceNumber() != null && !request.getReferenceNumber().isBlank())
+                ? request.getReferenceNumber()
+                : "LD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        load.setReferenceNumber(ref);
         load.setDescription(request.getDescription());
         load.setPickupLocation(request.getPickupLocation());
         load.setPickUpDateTime(request.getPickUpDateTime());
