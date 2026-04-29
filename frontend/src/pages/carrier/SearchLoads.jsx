@@ -87,8 +87,9 @@ export default function SearchLoads() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
 
       const data = await res.json();
-      setLoads(data);
-      setFiltered(data);
+      const posted = data.filter((l) => l.status === "POSTED");
+      setLoads(posted);
+      setFiltered(posted);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -155,47 +156,28 @@ export default function SearchLoads() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Search Panel */}
-        <div className="bg-white border-b border-gray-100 px-8 py-5 flex-shrink-0">
-          <div className="flex items-end gap-3 flex-wrap">
-            {/* Origin */}
-            <div className="flex flex-col gap-1.5 min-w-[180px]">
-              <label className="text-[10px] font-semibold tracking-[1.5px] text-gray-400 uppercase">
-                Origin
-              </label>
-              <div className="relative">
-                <MapPin
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+        <div className="bg-white border-b border-gray-100 px-6 py-4 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap">
+
+            {/* Route group: Origin → Destination */}
+            <div className="flex items-center gap-2 flex-1 min-w-0 w-full lg:w-auto">
+              <div className="relative flex-1 min-w-0">
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="City, State or ZIP"
+                  placeholder="Origin"
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="pl-8 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white text-gray-800 placeholder-gray-300 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all w-full"
                 />
               </div>
-            </div>
-
-            <ArrowRight
-              size={16}
-              className="text-gray-300 mb-2.5 flex-shrink-0"
-            />
-
-            {/* Destination */}
-            <div className="flex flex-col gap-1.5 min-w-[180px]">
-              <label className="text-[10px] font-semibold tracking-[1.5px] text-gray-400 uppercase">
-                Destination
-              </label>
-              <div className="relative">
-                <MapPin
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+              <ArrowRight size={16} className="text-gray-300 flex-shrink-0" />
+              <div className="relative flex-1 min-w-0">
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="City, State or ZIP"
+                  placeholder="Destination"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -204,63 +186,46 @@ export default function SearchLoads() {
               </div>
             </div>
 
-            {/* Pickup Date */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold tracking-[1.5px] text-gray-400 uppercase">
-                Pickup Date
-              </label>
-              <div className="relative">
-                <Calendar
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+            {/* Filters + buttons group */}
+            <div className="flex items-center gap-2 w-full lg:w-auto flex-shrink-0">
+              <div className="hidden lg:block w-px h-8 bg-gray-100 flex-shrink-0" />
+
+              {/* Pickup Date */}
+              <div className="relative flex-1 lg:flex-none">
+                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="pl-8 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all"
+                  className="pl-8 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all w-full"
                 />
               </div>
-            </div>
 
-            {/* Size */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold tracking-[1.5px] text-gray-400 uppercase">
-                Size
-              </label>
-              <div className="relative">
+              {/* Size */}
+              <div className="relative flex-1 lg:flex-none">
                 <select
                   value={sizeFilter}
                   onChange={(e) => setSizeFilter(e.target.value)}
-                  className="pl-3 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all appearance-none cursor-pointer"
+                  className="pl-3 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all appearance-none cursor-pointer w-full"
                 >
                   <option value="All">All Sizes</option>
                   <option value="FULL_LOAD">Full Load</option>
                   <option value="PARTIAL">Partial</option>
                 </select>
-                <ChevronDown
-                  size={13}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                />
+                <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex items-end gap-2 ml-auto">
               <button
                 onClick={fetchLoads}
-                className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-all"
+                className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-all flex-shrink-0"
                 title="Refresh"
               >
-                <RefreshCw
-                  size={14}
-                  className={loading ? "animate-spin" : ""}
-                />
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               </button>
               <button
                 onClick={handleSearch}
                 disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-amber-400 text-[#0d1117] rounded-lg hover:bg-amber-300 active:scale-[0.98] transition-all disabled:opacity-60"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold bg-amber-400 text-[#0d1117] rounded-lg hover:bg-amber-300 active:scale-[0.98] transition-all disabled:opacity-60 flex-shrink-0"
               >
                 <Search size={14} />
                 <span>Search</span>
@@ -433,7 +398,7 @@ export default function SearchLoads() {
                               {formatDate(load.pickUpDateTime)}
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-gray-100 text-gray-600">
+                              <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-gray-100 text-gray-600 whitespace-nowrap">
                                 {SIZE_LABELS[load.size] ?? load.size ?? "—"}
                               </span>
                             </td>

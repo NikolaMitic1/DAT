@@ -75,8 +75,9 @@ export default function SearchLoads() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
 
       const data = await res.json();
-      setLoads(data);
-      setFiltered(data);
+      const posted = data.filter((l) => l.status === "POSTED");
+      setLoads(posted);
+      setFiltered(posted);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -131,42 +132,28 @@ export default function SearchLoads() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Dark Search Panel — flows from sidebar */}
-        <div className="bg-[#0d1117] border-b border-white/5 px-8 py-5 flex-shrink-0">
-          <div className="flex items-end gap-3 flex-wrap">
-            {/* Origin */}
-            <div className="flex flex-col gap-1.5 min-w-[170px]">
-              <label className="text-[9px] font-semibold tracking-[2px] text-gray-500 uppercase">
-                Origin
-              </label>
-              <div className="relative">
-                <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+        <div className="bg-[#0d1117] border-b border-white/5 px-6 py-4 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap">
+
+            {/* Route group: Origin → Destination */}
+            <div className="flex items-center gap-2 flex-1 min-w-0 w-full lg:w-auto">
+              <div className="relative flex-1 min-w-0">
+                <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="City or State"
+                  placeholder="Origin"
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="pl-8 pr-3 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-400/60 transition-all w-full"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center gap-1 mb-2.5">
-              <div className="w-1 h-1 rounded-full bg-gray-700" />
-              <div className="w-4 h-px bg-gray-700" />
-              <ArrowRight size={13} className="text-gray-600" />
-            </div>
-
-            {/* Destination */}
-            <div className="flex flex-col gap-1.5 min-w-[170px]">
-              <label className="text-[9px] font-semibold tracking-[2px] text-gray-500 uppercase">
-                Destination
-              </label>
-              <div className="relative">
-                <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+              <ArrowRight size={13} className="text-gray-600 flex-shrink-0" />
+              <div className="relative flex-1 min-w-0">
+                <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="City or State"
+                  placeholder="Destination"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -175,34 +162,27 @@ export default function SearchLoads() {
               </div>
             </div>
 
-            <div className="w-px h-8 bg-white/5 mx-1 mb-1 self-end" />
+            {/* Filters + buttons group */}
+            <div className="flex items-center gap-2 w-full lg:w-auto flex-shrink-0">
+              <div className="hidden lg:block w-px h-8 bg-white/5 flex-shrink-0" />
 
-            {/* Pickup Date */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-semibold tracking-[2px] text-gray-500 uppercase">
-                Pickup Date
-              </label>
-              <div className="relative">
-                <Calendar size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+              {/* Pickup Date */}
+              <div className="relative flex-1 lg:flex-none">
+                <Calendar size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
                 <input
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="pl-8 pr-3 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-gray-300 focus:outline-none focus:border-amber-400/60 transition-all [color-scheme:dark]"
+                  className="pl-8 pr-3 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-gray-300 focus:outline-none focus:border-amber-400/60 transition-all [color-scheme:dark] w-full"
                 />
               </div>
-            </div>
 
-            {/* Size */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-semibold tracking-[2px] text-gray-500 uppercase">
-                Load Size
-              </label>
-              <div className="relative">
+              {/* Size */}
+              <div className="relative flex-1 lg:flex-none">
                 <select
                   value={sizeFilter}
                   onChange={(e) => setSizeFilter(e.target.value)}
-                  className="pl-3 pr-8 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-gray-300 focus:outline-none focus:border-amber-400/60 transition-all appearance-none cursor-pointer [color-scheme:dark]"
+                  className="pl-3 pr-8 py-2.5 text-sm border border-white/10 rounded-lg bg-white/5 text-gray-300 focus:outline-none focus:border-amber-400/60 transition-all appearance-none cursor-pointer [color-scheme:dark] w-full"
                 >
                   <option value="All">All Sizes</option>
                   <option value="FULL_LOAD">Full Load</option>
@@ -210,13 +190,10 @@ export default function SearchLoads() {
                 </select>
                 <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex items-end gap-2 ml-auto">
               <button
                 onClick={fetchLoads}
-                className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-500 border border-white/10 rounded-lg hover:bg-white/5 hover:text-gray-300 transition-all"
+                className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-500 border border-white/10 rounded-lg hover:bg-white/5 hover:text-gray-300 transition-all flex-shrink-0"
                 title="Refresh"
               >
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -224,7 +201,7 @@ export default function SearchLoads() {
               <button
                 onClick={handleSearch}
                 disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-amber-400 text-[#0d1117] rounded-lg hover:bg-amber-300 active:scale-[0.98] transition-all disabled:opacity-60"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold bg-amber-400 text-[#0d1117] rounded-lg hover:bg-amber-300 active:scale-[0.98] transition-all disabled:opacity-60 flex-shrink-0"
               >
                 <Search size={14} />
                 <span>Search</span>
@@ -401,7 +378,7 @@ export default function SearchLoads() {
                         return (
                           <tr
                             key={load.id}
-                            className={`group border-b border-gray-50 border-l-2 ${status.border} hover:bg-amber-400/[0.025] transition-colors cursor-pointer ${
+                            className={`group border-b border-gray-50 hover:bg-amber-400/[0.025] transition-colors cursor-pointer ${
                               i === sorted.length - 1 ? "border-b-0" : ""
                             }`}
                           >
@@ -442,7 +419,7 @@ export default function SearchLoads() {
                               {formatDate(load.pickUpDateTime)}
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded-md bg-gray-100 text-gray-600">
+                              <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded-md bg-gray-100 text-gray-600 whitespace-nowrap">
                                 {SIZE_LABELS[load.size] ?? load.size ?? "—"}
                               </span>
                             </td>

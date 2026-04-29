@@ -18,7 +18,6 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/broker" },
   { icon: Search, label: "Search Loads", path: "/broker/search-loads" },
   { icon: Truck, label: "Search Trucks", path: "/broker/search-trucks" },
-  { icon: Truck, label: "My Trucks", path: "/broker/my-trucks" },
   { icon: Package, label: "My Loads", path: "/broker/my-loads" },
   { icon: Lock, label: "Private Network", path: "/broker/network" },
   { icon: Wrench, label: "Tools", path: "/broker/tools" },

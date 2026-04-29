@@ -159,7 +159,7 @@ function LoadRow({ load, onDelete, isLast }) {
         {formatDateTime(load.pickUpDateTime)}
       </td>
       <td className="px-4 py-3.5">
-        <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-gray-100 text-gray-600">
+        <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-gray-100 text-gray-600 whitespace-nowrap">
           {SIZE_LABELS[load.size] ?? load.size ?? "—"}
         </span>
       </td>
