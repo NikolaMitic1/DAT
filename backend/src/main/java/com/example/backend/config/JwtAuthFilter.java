@@ -40,29 +40,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token);
 
-        if (email != null) {
-            User user = userRepository.findByEmail(email).orElse(null);
+        try {
+            String email = jwtService.extractEmail(token);
 
-            if (user != null && !jwtService.isTokenExpired(token)) {
+            if (email != null && !jwtService.isTokenExpired(token)) {
+                User user = userRepository.findByEmail(email).orElse(null);
 
-                CustomUserDetails userDetails = new CustomUserDetails(user);
+                if (user != null) {
+                    CustomUserDetails userDetails = new CustomUserDetails(user);
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Token is malformed or expired — skip auth, Spring Security returns 401
         }
 
         filterChain.doFilter(request, response);

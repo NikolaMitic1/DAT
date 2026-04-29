@@ -52,7 +52,7 @@ function formatPrice(price) {
 }
 
 export default function SearchLoads() {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [loads, setLoads] = useState([]);
@@ -81,7 +81,6 @@ export default function SearchLoads() {
       });
 
       if (res.status === 401 || res.status === 403) {
-        logout();
         navigate("/login");
         return;
       }
@@ -478,7 +477,7 @@ export default function SearchLoads() {
                       },
                       {
                         label: "Loads Available",
-                        value: sorted.length.toString(),
+                        value: sorted.filter((l) => l.status === "POSTED").length.toString(),
                         icon: Search,
                         color: "text-amber-500",
                       },

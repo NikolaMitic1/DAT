@@ -470,7 +470,7 @@ function AddTruckModal({ onClose, onSave }) {
 }
 
 export default function MyTrucks() {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [trucks, setTrucks] = useState([]);
@@ -491,7 +491,7 @@ export default function MyTrucks() {
       const res = await fetch("/api/trucks/my-trucks", {
         headers: { Authorization: `Bearer ${t}` },
       });
-      if (res.status === 401 || res.status === 403) { logout(); navigate("/login"); return; }
+      if (res.status === 401 || res.status === 403) { navigate("/login"); return; }
       if (!res.ok) throw new Error(`Error ${res.status}`);
       setTrucks(await res.json());
     } catch (err) {

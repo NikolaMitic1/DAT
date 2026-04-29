@@ -392,7 +392,7 @@ function PostLoadModal({ onClose, onSave }) {
 }
 
 export default function BrokerMyLoads() {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [loads, setLoads] = useState([]);
@@ -413,7 +413,7 @@ export default function BrokerMyLoads() {
       const res = await fetch("/api/loads/my-loads", {
         headers: { Authorization: `Bearer ${t}` },
       });
-      if (res.status === 401 || res.status === 403) { logout(); navigate("/login"); return; }
+      if (res.status === 401 || res.status === 403) { navigate("/login"); return; }
       if (!res.ok) throw new Error(`Error ${res.status}`);
       setLoads(await res.json());
     } catch (err) {

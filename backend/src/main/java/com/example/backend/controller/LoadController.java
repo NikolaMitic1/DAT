@@ -47,4 +47,11 @@ public class LoadController {
         return ResponseEntity.ok(load);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLoad(@AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable UUID id) {
+        loadService.deleteLoadForBroker(user.getEmail(), id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

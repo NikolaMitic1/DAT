@@ -77,6 +77,24 @@ public class LoadService {
         return loadRepository.findByReferenceNumber(number).orElseThrow(() -> new RuntimeException("Load not found"));
     }
 
+    public void deleteLoadForBroker(String email, UUID loadId) {
+        User broker = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Broker not found"));
+
+        if (broker.getRole() != UserRole.BROKER) {
+            throw new RuntimeException("User is not a broker");
+        }
+
+        Load load = loadRepository.findById(loadId)
+                .orElseThrow(() -> new RuntimeException("Load not found"));
+
+        if (!load.getBroker().getId().equals(broker.getId())) {
+            throw new RuntimeException("Load does not belong to this broker");
+        }
+
+        loadRepository.delete(load);
+    }
+
     public Load updateLoadForBroker(String email, UUID loadId, UpdateLoadRequest request) {
         User broker = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Broker not found"));
