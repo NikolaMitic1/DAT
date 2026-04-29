@@ -7,6 +7,7 @@ import {
   Package,
   Lock,
   Wrench,
+  ClipboardList,
   Bell,
   HelpCircle,
   User,
@@ -18,8 +19,9 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/broker" },
   { icon: Search, label: "Search Loads", path: "/broker/search-loads" },
   { icon: Truck, label: "Search Trucks", path: "/broker/search-trucks" },
-  { icon: Package, label: "My Loads", path: "/broker/my-loads" },
-  { icon: Lock, label: "Private Network", path: "/broker/network" },
+  { icon: Package,       label: "My Loads",  path: "/broker/my-loads" },
+  { icon: ClipboardList, label: "My Offers", path: "/broker/my-offers" },
+  { icon: Lock,          label: "Private Network", path: "/broker/network" },
   { icon: Wrench, label: "Tools", path: "/broker/tools" },
 ];
 
@@ -46,7 +48,7 @@ export default function BrokerSidebar() {
           <div className="w-1 h-10 bg-amber-400 rounded-sm flex-shrink-0" />
           <div className="flex flex-col gap-0.5">
             <span className="font-bebas text-[28px] tracking-[3px] text-white leading-none">
-              DAT One
+              DAT Serbia
             </span>
             <span className="font-outfit text-[10px] font-medium tracking-[2.5px] text-amber-400 uppercase leading-none">
               Broker Portal

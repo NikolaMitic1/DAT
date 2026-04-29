@@ -54,8 +54,8 @@ public class LoadOfferService {
         Truck truck = truckRepository.findById(request.getTruckId())
                 .orElseThrow(() -> new RuntimeException("Truck not found"));
 
-        if (!truck.getDriver().getId().equals(user.getId())) {
-            throw new RuntimeException("Truck does not belong to this user");
+        if (!truck.getCarrier().getId().equals(user.getId())) {
+            throw new RuntimeException("Truck does not belong to this carrier");
         }
 
         if (truck.getTruckStatus() != TruckStatus.AVAILABLE) {
@@ -105,8 +105,8 @@ public class LoadOfferService {
         }
 
         return loadOfferRepository.findAll().stream()
-                .filter(offer -> offer.getTruck().getDriver() != null
-                        && offer.getTruck().getDriver().getId().equals(user.getId()))
+                .filter(offer -> offer.getTruck().getCarrier() != null
+                        && offer.getTruck().getCarrier().getId().equals(user.getId()))
                 .toList();
     }
 
@@ -181,7 +181,7 @@ public class LoadOfferService {
         LoadOffer offer = loadOfferRepository.findById(offerId)
                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
-        if (!offer.getTruck().getDriver().getId().equals(user.getId())) {
+        if (!offer.getTruck().getCarrier().getId().equals(user.getId())) {
             throw new RuntimeException("Offer does not belong to this carrier");
         }
 
