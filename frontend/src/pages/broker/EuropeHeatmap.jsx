@@ -8,8 +8,6 @@ const EUROPE_IDS = new Set([
   616, 620, 642, 643, 674, 688, 703, 705, 724, 752, 756, 792, 804, 826,
 ]);
 
-// Excluded from projection fit (too large / partially outside Europe)
-const FIT_EXCLUDE = new Set([643, 792]);
 
 export const COUNTRY_NAMES = {
   8: "Albania", 20: "Andorra", 40: "Austria", 112: "Belarus",
@@ -29,9 +27,10 @@ export const COUNTRY_NAMES = {
 const ATLAS_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 let worldCache = null;
 
-function buildColorScale(maxLoads) {
+// Absolute thresholds matching the legend: 1-5 blue, 5-15 blue2, 15-30 cyan, 30-50 orange, 50+ red
+function buildColorScale() {
   return d3.scaleLinear()
-    .domain([0, maxLoads * 0.12, maxLoads * 0.4, maxLoads * 0.72, maxLoads])
+    .domain([0, 5, 15, 30, 50])
     .range(["#1e3a8a", "#2563eb", "#06b6d4", "#f97316", "#ef4444"])
     .clamp(true);
 }
@@ -53,10 +52,10 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
   // Update country colors when data changes (no map rebuild needed)
   useEffect(() => {
     if (!pathsRef.current || !colorScaleRef.current) return;
-    colorScaleRef.current = buildColorScale(maxLoads);
+    colorScaleRef.current = buildColorScale();
     pathsRef.current.attr("fill", d => {
       const v = loadData[+d.id];
-      return v > 0 ? colorScaleRef.current(v) : "#0c1822";
+      return v > 0 ? colorScaleRef.current(v) : "#e5e7eb";
     });
   }, [loadData, maxLoads]);
 
@@ -76,7 +75,7 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
     svg.attr("width", W).attr("height", H);
 
     // Use hardcoded initial domain; color-update effect corrects it immediately
-    const cs = buildColorScale(400);
+    const cs = buildColorScale();
     colorScaleRef.current = cs;
 
     const g = svg.append("g");
@@ -103,12 +102,14 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
           .features;
 
         const europeFeatures = allFeatures.filter(f => EUROPE_IDS.has(+f.id));
-        const fitFeatures = europeFeatures.filter(f => !FIT_EXCLUDE.has(+f.id));
 
-        const proj = d3.geoNaturalEarth1().fitExtent(
-          [[16, 12], [W - 16, H - 12]],
-          { type: "FeatureCollection", features: fitFeatures }
-        );
+        // Fixed projection centered on mainland Europe — avoids fitExtent being
+        // pulled south by France's overseas territories (French Guiana).
+        const proj = d3.geoMercator()
+          .center([14, 52])
+          .scale(H * 0.95)
+          .translate([W / 2, H / 2]);
+
         const path = d3.geoPath(proj);
 
         const paths = g
@@ -118,9 +119,9 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
           .attr("d", path)
           .attr("fill", d => {
             const v = loadDataRef.current[+d.id];
-            return v > 0 ? cs(v) : "#0c1822";
+            return v > 0 ? cs(v) : "#e5e7eb";
           })
-          .attr("stroke", "#1c2538")
+          .attr("stroke", "#d1d5db")
           .attr("stroke-width", 0.75)
           .style("cursor", "pointer");
 
@@ -147,7 +148,7 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
           })
           .on("pointerleave", function () {
             d3.select(this)
-              .attr("stroke", "#1c2538")
+              .attr("stroke", "#d1d5db")
               .attr("stroke-width", 0.75)
               .style("filter", "none");
             setTooltip(null);
@@ -187,8 +188,8 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
     <div ref={containerRef} className="relative w-full h-full select-none overflow-hidden">
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-          <div className="w-7 h-7 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" />
-          <span className="text-[10px] tracking-[3px] text-gray-600 uppercase font-outfit">
+          <div className="w-7 h-7 border-2 border-amber-400/30 border-t-amber-500 rounded-full animate-spin" />
+          <span className="text-[10px] tracking-[3px] text-gray-400 uppercase font-outfit">
             Loading map
           </span>
         </div>
@@ -196,15 +197,15 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
       <svg ref={svgRef} className="w-full h-full" />
       {tooltip && tipStyle && (
         <div className="absolute z-50 pointer-events-none" style={tipStyle}>
-          <div className="bg-[#07090e]/96 border border-amber-400/40 rounded-lg px-4 py-3 shadow-2xl backdrop-blur-md">
-            <div className="font-outfit font-semibold text-[13px] text-white leading-tight">
+          <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-lg">
+            <div className="font-outfit font-semibold text-[13px] text-gray-800 leading-tight">
               {tooltip.name}
             </div>
             <div className="flex items-baseline gap-2 mt-2">
-              <span className="font-bebas text-[26px] text-amber-400 leading-none">
+              <span className="font-bebas text-[26px] text-amber-600 leading-none">
                 {tooltip.loads.toLocaleString()}
               </span>
-              <span className="text-[10px] text-gray-500 tracking-[2px] uppercase">
+              <span className="text-[10px] text-gray-400 tracking-[2px] uppercase">
                 active loads
               </span>
             </div>

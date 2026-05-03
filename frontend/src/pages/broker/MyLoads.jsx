@@ -1,4 +1,5 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import BrokerSidebar from "../../components/sidebar/BrokerSidebar";
 import { AuthContext } from "../../context/AuthContext";
@@ -12,6 +13,9 @@ import {
   AlertCircle,
   RefreshCw,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
   DollarSign,
   CheckCircle2,
   XCircle,
@@ -20,6 +24,17 @@ import {
   Weight,
   TrendingUp,
 } from "lucide-react";
+
+const EUROPEAN_COUNTRIES = [
+  "Albania", "Andorra", "Austria", "Belarus", "Belgium",
+  "Bosnia & Herzegovina", "Bulgaria", "Croatia", "Cyprus", "Czech Republic",
+  "Denmark", "Estonia", "Finland", "France", "Germany", "Greece",
+  "Hungary", "Iceland", "Ireland", "Italy", "Latvia", "Liechtenstein",
+  "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro",
+  "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal",
+  "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia",
+  "Spain", "Sweden", "Switzerland", "Turkey", "Ukraine", "United Kingdom",
+];
 
 const SIZE_LABELS = {
   FULL_LOAD: "Full Load",
@@ -63,6 +78,271 @@ const STATUS_CONFIG = {
     ring: "ring-red-200",
   },
 };
+
+const MONTH_NAMES = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
+
+function DateTimePicker({ value, onChange, required }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const btnRef = useRef(null);
+  const popupRef = useRef(null);
+
+  const now = new Date();
+  const parsed = value ? new Date(value) : null;
+  const isValid = parsed && !isNaN(parsed);
+
+  const [viewYear, setViewYear]   = useState(isValid ? parsed.getFullYear() : now.getFullYear());
+  const [viewMonth, setViewMonth] = useState(isValid ? parsed.getMonth() : now.getMonth());
+  const [hour, setHour]     = useState(isValid ? String(parsed.getHours()).padStart(2,"0") : "09");
+  const [minute, setMinute] = useState(isValid ? String(parsed.getMinutes()).padStart(2,"0") : "00");
+
+  // Sync time inputs when value changes externally (e.g. form reset)
+  useEffect(() => {
+    const d = value ? new Date(value) : null;
+    if (d && !isNaN(d)) {
+      setHour(String(d.getHours()).padStart(2,"0"));
+      setMinute(String(d.getMinutes()).padStart(2,"0"));
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target) &&
+          btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const handleOpen = () => {
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 6, left: r.left, width: Math.max(r.width, 308) });
+    }
+    setOpen(o => !o);
+  };
+
+  const emit = (y, mo, d, h, m) => {
+    const hh = String(Math.min(23, Math.max(0, +h))).padStart(2,"0");
+    const mm = String(Math.min(59, Math.max(0, +m))).padStart(2,"0");
+    onChange(`${y}-${String(mo + 1).padStart(2,"0")}-${String(d).padStart(2,"0")}T${hh}:${mm}`);
+  };
+
+  const pickDay = (day) => emit(viewYear, viewMonth, day, hour, minute);
+
+  const handleHour = (e) => {
+    setHour(e.target.value);
+    if (isValid) emit(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), e.target.value, minute);
+  };
+  const handleMinute = (e) => {
+    setMinute(e.target.value);
+    if (isValid) emit(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), hour, e.target.value);
+  };
+
+  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y-1); } else setViewMonth(m => m-1); };
+  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y+1); } else setViewMonth(m => m+1); };
+
+  const firstDay     = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth  = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const offsetDays   = (firstDay + 6) % 7; // Mon=0, Sun=6
+
+  const displayValue = isValid
+    ? `${MONTH_NAMES[parsed.getMonth()].slice(0,3)} ${parsed.getDate()}, ${parsed.getFullYear()}  ·  ${String(parsed.getHours()).padStart(2,"0")}:${String(parsed.getMinutes()).padStart(2,"0")}`
+    : "";
+
+  const popup = open && pos ? createPortal(
+    <div
+      ref={popupRef}
+      className="fixed bg-white border border-gray-200 rounded-xl shadow-2xl font-outfit overflow-hidden"
+      style={{ top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+    >
+      {/* Month nav */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <button type="button" onClick={prevMonth}
+          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <ChevronLeft size={14} />
+        </button>
+        <span className="text-sm font-semibold text-gray-800 tracking-wide">
+          {MONTH_NAMES[viewMonth]} {viewYear}
+        </span>
+        <button type="button" onClick={nextMonth}
+          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <ChevronRight size={14} />
+        </button>
+      </div>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 px-3 pt-3 pb-1">
+        {["Mo","Tu","We","Th","Fr","Sa","Su"].map(d => (
+          <div key={d} className="text-center text-[10px] font-semibold text-gray-400 tracking-wider">{d}</div>
+        ))}
+      </div>
+
+      {/* Day grid */}
+      <div className="grid grid-cols-7 px-3 pb-3 gap-y-0.5">
+        {Array.from({ length: offsetDays }).map((_, i) => <div key={`e${i}`} />)}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const isSel  = isValid && parsed.getFullYear() === viewYear && parsed.getMonth() === viewMonth && parsed.getDate() === day;
+          const isToday = now.getFullYear() === viewYear && now.getMonth() === viewMonth && now.getDate() === day;
+          const isPast  = new Date(viewYear, viewMonth, day) < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          return (
+            <button key={day} type="button" disabled={isPast} onClick={() => pickDay(day)}
+              className={[
+                "h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-sm transition-all",
+                isSel  ? "bg-amber-400 text-white font-semibold shadow-sm" : "",
+                isToday && !isSel ? "ring-1 ring-amber-400 text-amber-600 font-medium" : "",
+                !isSel && !isToday && !isPast ? "text-gray-700 hover:bg-amber-50 hover:text-amber-700 cursor-pointer" : "",
+                isPast ? "text-gray-300 cursor-not-allowed" : "",
+              ].join(" ")}
+            >{day}</button>
+          );
+        })}
+      </div>
+
+      {/* Time + Done */}
+      <div className="border-t border-gray-100 px-4 py-3 flex items-center gap-3 bg-gray-50/60">
+        <Clock size={13} className="text-gray-400 flex-shrink-0" />
+        <span className="text-xs text-gray-500 font-medium">Time</span>
+        <div className="flex items-center gap-1.5">
+          <input type="number" min="0" max="23" value={hour} onChange={handleHour}
+            className="w-12 text-center text-sm border border-gray-200 rounded-lg py-1.5 text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 tabular-nums transition-all" />
+          <span className="text-gray-400 font-bold">:</span>
+          <input type="number" min="0" max="59" value={minute} onChange={handleMinute}
+            className="w-12 text-center text-sm border border-gray-200 rounded-lg py-1.5 text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 tabular-nums transition-all" />
+        </div>
+        <button type="button" onClick={() => setOpen(false)} disabled={!isValid}
+          className="ml-auto px-4 py-1.5 text-xs font-semibold bg-amber-400 text-[#0d1117] rounded-lg hover:bg-amber-300 transition-all disabled:opacity-40">
+          Done
+        </button>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <div className="relative">
+      <button ref={btnRef} type="button" onClick={handleOpen}
+        className={`w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white flex items-center gap-2.5 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all hover:border-gray-300 ${!value ? "text-gray-400" : "text-gray-800"}`}
+      >
+        <Calendar size={14} className="text-gray-400 flex-shrink-0" />
+        {displayValue || "Select date & time"}
+      </button>
+      {required && !value && (
+        <input type="text" required value="" onChange={() => {}} tabIndex={-1} className="sr-only absolute" aria-hidden />
+      )}
+      {popup}
+    </div>
+  );
+}
+
+// ISO 2-letter codes for European countries
+const EUROPE_CC = "al,ad,at,by,be,ba,bg,hr,cy,cz,dk,ee,fi,fr,de,gr,hu,is,ie,it,lv,li,lt,lu,mt,md,mc,me,nl,mk,no,pl,pt,ro,ru,sm,rs,sk,si,es,se,ch,tr,ua,gb";
+
+const COUNTRY_NAME_MAP = {
+  "Czechia": "Czech Republic",
+  "Bosnia and Herzegovina": "Bosnia & Herzegovina",
+};
+function normaliseCountry(name) {
+  return COUNTRY_NAME_MAP[name] ?? name;
+}
+
+// Single location field — shows "Paris, France" style suggestions
+function LocationAutocomplete({ value, onChange, placeholder, required, inputCls }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [fetching, setFetching] = useState(false);
+  const [open, setOpen] = useState(false);
+  const timerRef = useRef(null);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    const close = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    onChange(val);
+    clearTimeout(timerRef.current);
+    if (val.length < 2) { setSuggestions([]); setOpen(false); return; }
+    setFetching(true);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=7&accept-language=en&countrycodes=${EUROPE_CC}`;
+        const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+        const data = await res.json();
+        const seen = new Set();
+        const results = data
+          .filter(r => r.address?.country)
+          .map(r => {
+            const city = r.address.city || r.address.town || r.address.village || r.address.municipality || val;
+            const country = normaliseCountry(r.address.country);
+            return { city, country, label: `${city}, ${country}` };
+          })
+          .filter(r => {
+            if (seen.has(r.label)) return false;
+            seen.add(r.label);
+            return EUROPEAN_COUNTRIES.includes(r.country);
+          })
+          .slice(0, 6);
+        setSuggestions(results);
+        setOpen(results.length > 0);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setFetching(false);
+      }
+    }, 400);
+  };
+
+  const pick = (s) => {
+    onChange(s.label);
+    setSuggestions([]);
+    setOpen(false);
+  };
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+      {fetching && (
+        <Loader2 size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin pointer-events-none z-10" />
+      )}
+      <input
+        className={`${inputCls} pl-9 ${fetching ? "pr-8" : ""}`}
+        placeholder={placeholder}
+        value={value}
+        onChange={handleChange}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
+        autoComplete="off"
+        required={required}
+      />
+      {open && suggestions.length > 0 && (
+        <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onMouseDown={() => pick(s)}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left hover:bg-amber-50 transition-colors border-b border-gray-50 last:border-b-0"
+            >
+              <MapPin size={11} className="text-amber-400 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-800">{s.city}</span>
+              <span className="text-xs text-gray-400">,</span>
+              <span className="text-sm text-gray-500">{s.country}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const EMPTY_FORM = {
   pickupLocation: "",
@@ -257,44 +537,33 @@ function PostLoadModal({ onClose, onSave }) {
           <div className="p-6 grid grid-cols-2 gap-x-5 gap-y-4">
             <div className="col-span-2">
               <label className={labelCls}>Pickup Location *</label>
-              <div className="relative">
-                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input
-                  className={`${inputCls} pl-9`}
-                  placeholder="e.g. Chicago, IL"
-                  value={form.pickupLocation}
-                  onChange={set("pickupLocation")}
-                  required
-                />
-              </div>
+              <LocationAutocomplete
+                value={form.pickupLocation}
+                onChange={(val) => setForm(p => ({ ...p, pickupLocation: val }))}
+                placeholder="e.g. Paris, France"
+                required
+                inputCls={inputCls}
+              />
             </div>
 
             <div className="col-span-2">
               <label className={labelCls}>Delivery Location *</label>
-              <div className="relative">
-                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input
-                  className={`${inputCls} pl-9`}
-                  placeholder="e.g. Dallas, TX"
-                  value={form.deliveryLocation}
-                  onChange={set("deliveryLocation")}
-                  required
-                />
-              </div>
+              <LocationAutocomplete
+                value={form.deliveryLocation}
+                onChange={(val) => setForm(p => ({ ...p, deliveryLocation: val }))}
+                placeholder="e.g. Berlin, Germany"
+                required
+                inputCls={inputCls}
+              />
             </div>
 
             <div className="col-span-2">
               <label className={labelCls}>Pickup Date & Time *</label>
-              <div className="relative">
-                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input
-                  type="datetime-local"
-                  className={`${inputCls} pl-9`}
-                  value={form.pickUpDateTime}
-                  onChange={set("pickUpDateTime")}
-                  required
-                />
-              </div>
+              <DateTimePicker
+                value={form.pickUpDateTime}
+                onChange={(val) => setForm(p => ({ ...p, pickUpDateTime: val }))}
+                required
+              />
             </div>
 
             <div>
