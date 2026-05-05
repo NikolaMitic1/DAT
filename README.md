@@ -4,6 +4,12 @@
 
 ---
 
+# DAT
+
+[![GitHub stars](https://img.shields.io/github/stars/NikolaMitic1/DAT?style=social)](https://github.com/NikolaMitic1/DAT/stargazers)
+[![Spring](https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=spring&logoColor=white)](https://spring.io/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://react.dev/)
+
 ## Opis
 
 DAT Freight & Analytics Srbija je sveobuhvatna platforma za povezivanje tereta i upravljanje logistikom, dizajnirana specijalno za srpsko tržište transporta. Naša aplikacija povezuje brokere tereta sa prevoznicima kako bi se unapredio proces pronalaženja, nudjenja i prevoza tereta širom Srbije i šire.
