@@ -44,7 +44,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      */
     List<User> findByCompanyIdAndRole(UUID companyId, UserRole role);
 
-
-
-
+    Optional<User> findByVerificationToken(String token);
 }

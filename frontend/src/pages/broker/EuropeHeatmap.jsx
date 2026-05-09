@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import * as topojson from "topojson-client";
 
+const KOSOVO_ID = 383;
+
 const EUROPE_IDS = new Set([
   8, 20, 40, 112, 56, 70, 100, 191, 196, 203, 208, 233, 246, 250, 276, 300,
   348, 352, 372, 380, 428, 438, 440, 442, 470, 498, 492, 499, 528, 807, 578,
@@ -101,7 +103,22 @@ export default function EuropeHeatmap({ loadData, maxLoads, onCountryClick }) {
           .feature(worldCache, worldCache.objects.countries)
           .features;
 
-        const europeFeatures = allFeatures.filter(f => EUROPE_IDS.has(+f.id));
+        const countriesGeoms = worldCache.objects.countries.geometries;
+        const serbiaGeom = countriesGeoms.find(g => +g.id === 688);
+        const kosovoGeom = countriesGeoms.find(g => +g.id === KOSOVO_ID);
+
+        // Merge Kosovo into Serbia so they render as one territory
+        let mergedSerbiaFeature = null;
+        if (serbiaGeom && kosovoGeom) {
+          const merged = topojson.merge(worldCache, [serbiaGeom, kosovoGeom]);
+          mergedSerbiaFeature = { type: "Feature", id: 688, properties: {}, geometry: merged };
+        }
+
+        const europeFeatures = allFeatures
+          .filter(f => EUROPE_IDS.has(+f.id) && +f.id !== 688 && +f.id !== KOSOVO_ID)
+          .concat(mergedSerbiaFeature
+            ? [mergedSerbiaFeature]
+            : allFeatures.filter(f => +f.id === 688));
 
         // Fixed projection centered on mainland Europe — avoids fitExtent being
         // pulled south by France's overseas territories (French Guiana).

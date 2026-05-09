@@ -52,10 +52,25 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    @Column(nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(unique = true)
+    private String verificationToken;
+
+    private LocalDateTime verificationTokenExpiresAt;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void verifyEmail() {
+        this.emailVerified = true;
+        this.verificationToken = null;
+        this.verificationTokenExpiresAt = null;
+    }
+
 }
